@@ -1,0 +1,30 @@
+{
+  "project_info": {
+    "project_number": "591846288701",
+    "firebase_url": "https://my-kivi-app-default-rtdb.firebaseio.com",
+    "project_id": "my-kivi-app",
+    "storage_bucket": "my-kivi-app.firebasestorage.app"
+  },
+  "client": [
+    {
+      "client_info": {
+        "mobilesdk_app_id": "1:591846288701:android:ce74f34901449c1f576954",
+        "android_client_info": {
+          "package_name": "com.example.periodsapp"
+        }
+      },
+      "oauth_client": [],
+      "api_key": [
+        {
+          "current_key": "AIzaSyAGbtecY32mEX0Q4pkUVwXLt6pa-xjJV20"
+        }
+      ],
+      "services": {
+        "appinvite_service": {
+          "other_platform_oauth_client": []
+        }
+      }
+    }
+  ],
+  "configuration_version": "1"
+}
