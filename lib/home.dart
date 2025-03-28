@@ -1,4 +1,3 @@
-// lib/home.dart
 import 'package:flutter/material.dart';
 import 'package:table_calendar/table_calendar.dart';
 
@@ -40,7 +39,10 @@ class _HomeState extends State<Home> with SingleTickerProviderStateMixin {
   void _addSymptomCard() {
     setState(() {
       _symptomCards.add(
-        _buildInsightCard(label: "Symptoms", value: "😊😊"),
+        Padding(
+          padding: const EdgeInsets.only(left: 10), // Add padding to the left of new cards
+          child: _buildInsightCard(label: "Symptoms", value: "😊😊"),
+        ),
       );
     });
   }
@@ -54,7 +56,7 @@ class _HomeState extends State<Home> with SingleTickerProviderStateMixin {
         Navigator.pushReplacementNamed(context, '/home');
         break;
       case 1:
-        Navigator.pushNamed(context, '/notifications');
+        Navigator.pushNamed(context, '/notificationsr');
         break;
       case 2:
         Navigator.pushNamed(context, '/women');
@@ -95,7 +97,7 @@ class _HomeState extends State<Home> with SingleTickerProviderStateMixin {
                       ),
                       const SizedBox(height: 20),
                       _buildCalendar(),
-                      const SizedBox(height: 60), // Increased to push insights lower
+                      const SizedBox(height: 40), // Increased spacing to push insights lower
                       const Text(
                         "Your Daily Insights",
                         style: TextStyle(
@@ -113,7 +115,7 @@ class _HomeState extends State<Home> with SingleTickerProviderStateMixin {
                       ),
                       const SizedBox(height: 30),
                       _buildInsights(),
-                      const SizedBox(height: 20), // Extra space before nav bar
+                      const SizedBox(height: 20),
                     ],
                   ),
                 ),
@@ -129,14 +131,14 @@ class _HomeState extends State<Home> with SingleTickerProviderStateMixin {
   Widget _buildCalendar() {
     return Center(
       child: Container(
-        height: MediaQuery.of(context).size.height * 0.28, // Reduced height to fix overflow
+        height: MediaQuery.of(context).size.height * .49, // Reduced height to prevent overflow
         width: MediaQuery.of(context).size.width * 0.7,
         decoration: BoxDecoration(
           color: Colors.white,
           borderRadius: BorderRadius.circular(50),
           border: Border.all(color: const Color(0xFF8C588C), width: 2),
         ),
-        padding: const EdgeInsets.fromLTRB(25, 15, 25, 5), // Adjusted padding
+        padding: const EdgeInsets.fromLTRB(25, 15, 25, 10), // Adjusted padding
         child: Column(
           children: [
             const Text(
@@ -162,21 +164,21 @@ class _HomeState extends State<Home> with SingleTickerProviderStateMixin {
                   });
                 },
                 calendarStyle: CalendarStyle(
-                  defaultTextStyle: const TextStyle(color: Color(0xFF8C588C), fontWeight: FontWeight.bold, fontSize: 12),
-                  weekendTextStyle: const TextStyle(color: Color(0xFF8C588C), fontWeight: FontWeight.bold, fontSize: 12),
-                  outsideTextStyle: const TextStyle(color: Colors.grey, fontSize: 12), // Hide outside dates
+                  defaultTextStyle: const TextStyle(color: Color(0xFF8C588C), fontWeight: FontWeight.bold, fontSize: 10),
+                  weekendTextStyle: const TextStyle(color: Color(0xFF8C588C), fontWeight: FontWeight.bold, fontSize: 10),
+                  outsideTextStyle: const TextStyle(color: Colors.grey, fontSize: 10),
                   selectedDecoration: const BoxDecoration(
                     color: Color(0xFF8C588C),
                     shape: BoxShape.circle,
                   ),
                   todayDecoration: BoxDecoration(
-                    color: const Color(0xFF8C588C).withOpacity(0.5),
+                    color: const Color(0xFF8C588C).withOpacity(1),
                     shape: BoxShape.circle,
                   ),
                 ),
                 daysOfWeekStyle: const DaysOfWeekStyle(
-                  weekdayStyle: TextStyle(color: Colors.black, fontSize: 12),
-                  weekendStyle: TextStyle(color: Colors.black, fontSize: 12),
+                  weekdayStyle: TextStyle(color: Colors.black, fontSize: 10),
+                  weekendStyle: TextStyle(color: Colors.black, fontSize: 10),
                 ),
                 headerVisible: false,
               ),
@@ -196,14 +198,14 @@ class _HomeState extends State<Home> with SingleTickerProviderStateMixin {
           const SizedBox(width: 10),
           _buildInsightCard(label: "Ovulation", value: "03"),
           const SizedBox(width: 10),
-          _buildInsightCard(label: "Symptoms", value: "😊😔😣"), // Inline emojis
-          ..._symptomCards,
+          _buildInsightCard(label: "Symptoms", value: "😊😔😣"),
+          ..._symptomCards, // Dynamically added cards with left padding
           const SizedBox(width: 10),
           GestureDetector(
             onTap: _addSymptomCard,
             child: Container(
-              width: MediaQuery.of(context).size.width * 0.26, // Increased width
-              height: 80,
+              width: MediaQuery.of(context).size.width * 0.26,
+              height: 81,
               decoration: BoxDecoration(
                 color: const Color(0xFF8C588C),
                 borderRadius: BorderRadius.circular(25),
@@ -238,7 +240,7 @@ class _HomeState extends State<Home> with SingleTickerProviderStateMixin {
 
   Widget _buildInsightCard({required String label, required String value}) {
     return Container(
-      width: MediaQuery.of(context).size.width * 0.26, // Increased width
+      width: MediaQuery.of(context).size.width * 0.26,
       height: 80,
       decoration: BoxDecoration(
         color: const Color(0xFF8C588C),
@@ -268,7 +270,7 @@ class _HomeState extends State<Home> with SingleTickerProviderStateMixin {
               fontWeight: FontWeight.bold,
             ),
             textAlign: TextAlign.center,
-            overflow: TextOverflow.ellipsis, // Ensure text stays in one line
+            overflow: TextOverflow.ellipsis,
             maxLines: 1,
           ),
         ],
@@ -279,12 +281,12 @@ class _HomeState extends State<Home> with SingleTickerProviderStateMixin {
   Widget _buildNavigationBar() {
     return Container(
       padding: const EdgeInsets.symmetric(vertical: 10),
-      color: const Color(0xFFF5EBFB), // Match background to remove white space
+      color: const Color(0xFFF5EBFB),
       child: Row(
         mainAxisAlignment: MainAxisAlignment.spaceAround,
         children: [
           _buildNavItem(0, 'assets/images/home.png', "Home"),
-          _buildNavItem(1, 'assets/images/bell.png', "Notifications"),
+          _buildNavItem(1, 'assets/images/bell.png', "Notification"),
           _buildNavItem(2, 'assets/images/women.png', "Women", width: 20, height: 40),
           _buildNavItem(3, 'assets/images/profile.png', "Profile"),
           _buildNavItem(4, 'assets/images/settings.png', "Settings"),
