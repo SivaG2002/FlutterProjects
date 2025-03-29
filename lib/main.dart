@@ -12,6 +12,7 @@ import 'women.dart';
 import 'settings.dart';
 import 'profile.dart';
 import 'notify.dart';
+import 'skip1.dart';
 
 void main() async{
   WidgetsFlutterBinding.ensureInitialized();
@@ -32,9 +33,10 @@ class MyApp extends StatelessWidget {
         primarySwatch: Colors.blue,
         useMaterial3: true, // Modern Material design
       ),
-      initialRoute: '/front', // Start with Front screen
+      initialRoute: '/skip1', // Start with Front screen
       routes: {
         '/front': (context) => const Front(),
+        '/skip1': (context) => const Skip1Screen(),
         '/landing': (context) => const Landing(),
         '/login': (context) => const Login(),
         '/signup': (context) => const SignUp(),
