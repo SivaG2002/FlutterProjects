@@ -56,7 +56,7 @@ class _HomeState extends State<Home> with SingleTickerProviderStateMixin {
         Navigator.pushReplacementNamed(context, '/home');
         break;
       case 1:
-        Navigator.pushNamed(context, '/notificationsr');
+        Navigator.pushNamed(context, '/notification');
         break;
       case 2:
         Navigator.pushNamed(context, '/women');
@@ -131,14 +131,14 @@ class _HomeState extends State<Home> with SingleTickerProviderStateMixin {
   Widget _buildCalendar() {
     return Center(
       child: Container(
-        height: MediaQuery.of(context).size.height * .49, // Reduced height to prevent overflow
-        width: MediaQuery.of(context).size.width * 0.7,
+        height: MediaQuery.of(context).size.height * .48, // Reduced height to prevent overflow
+        width: MediaQuery.of(context).size.width * 0.88,
         decoration: BoxDecoration(
           color: Colors.white,
           borderRadius: BorderRadius.circular(50),
           border: Border.all(color: const Color(0xFF8C588C), width: 2),
         ),
-        padding: const EdgeInsets.fromLTRB(25, 15, 25, 10), // Adjusted padding
+        padding: const EdgeInsets.fromLTRB(35, 20, 35, 10), // Adjusted padding
         child: Column(
           children: [
             const Text(
@@ -148,6 +148,7 @@ class _HomeState extends State<Home> with SingleTickerProviderStateMixin {
                 fontSize: 18,
                 fontWeight: FontWeight.bold,
                 fontFamily: 'Delm Medium',
+                
               ),
             ),
             const SizedBox(height: 5),
@@ -177,8 +178,8 @@ class _HomeState extends State<Home> with SingleTickerProviderStateMixin {
                   ),
                 ),
                 daysOfWeekStyle: const DaysOfWeekStyle(
-                  weekdayStyle: TextStyle(color: Colors.black, fontSize: 10),
-                  weekendStyle: TextStyle(color: Colors.black, fontSize: 10),
+                  weekdayStyle: TextStyle(color: Colors.black, fontSize: 10, fontWeight: FontWeight.bold),
+                  weekendStyle: TextStyle(color: Colors.red, fontSize: 10),
                 ),
                 headerVisible: false,
               ),
@@ -204,8 +205,8 @@ class _HomeState extends State<Home> with SingleTickerProviderStateMixin {
           GestureDetector(
             onTap: _addSymptomCard,
             child: Container(
-              width: MediaQuery.of(context).size.width * 0.26,
-              height: 81,
+              width: MediaQuery.of(context).size.width * 0.29,
+              height: 84,
               decoration: BoxDecoration(
                 color: const Color(0xFF8C588C),
                 borderRadius: BorderRadius.circular(25),
@@ -240,8 +241,8 @@ class _HomeState extends State<Home> with SingleTickerProviderStateMixin {
 
   Widget _buildInsightCard({required String label, required String value}) {
     return Container(
-      width: MediaQuery.of(context).size.width * 0.26,
-      height: 80,
+      width: MediaQuery.of(context).size.width * 0.29,
+      height: 84,
       decoration: BoxDecoration(
         color: const Color(0xFF8C588C),
         borderRadius: BorderRadius.circular(25),
