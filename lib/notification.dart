@@ -447,7 +447,7 @@ class _NotificationScreenState extends State<NotificationScreen> with SingleTick
                                 Transform.translate(
                                   offset: const Offset(0, -31), // Move the hand up by half its length to start from the center
                                   child: Container(
-                                    width: 4,
+                                    width: 1.5,
                                     height: 75, // Length of the hand is 90 pixels
                                     color: const Color(0xFF8B5A8B),
                                   ),
