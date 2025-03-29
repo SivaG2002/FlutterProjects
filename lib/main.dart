@@ -13,6 +13,7 @@ import 'settings.dart';
 import 'profile.dart';
 import 'notify.dart';
 import 'skip1.dart';
+import 'skip2.dart';
 
 void main() async{
   WidgetsFlutterBinding.ensureInitialized();
@@ -33,10 +34,11 @@ class MyApp extends StatelessWidget {
         primarySwatch: Colors.blue,
         useMaterial3: true, // Modern Material design
       ),
-      initialRoute: '/skip1', // Start with Front screen
+      initialRoute: '/skip2', // Start with Front screen
       routes: {
         '/front': (context) => const Front(),
         '/skip1': (context) => const Skip1Screen(),
+        '/skip2': (context) => const Skip2Screen(),
         '/landing': (context) => const Landing(),
         '/login': (context) => const Login(),
         '/signup': (context) => const SignUp(),
