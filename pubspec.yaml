@@ -14,6 +14,7 @@ dependencies:
   firebase_core: ^2.31.0
   firebase_auth: ^4.19.0
   table_calendar: ^3.1.2
+  audioplayers: ^6.0.0  # Add this for playing audio
   
 
 dev_dependencies:
@@ -38,3 +39,4 @@ flutter:
     - assets/images/skip1.png
     - assets/images/skip2.png
     - assets/images/bellremainder.png
+    - assets/audio/alert.mp4

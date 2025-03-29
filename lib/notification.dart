@@ -1,5 +1,7 @@
 import 'package:flutter/material.dart';
 import 'dart:math' as math;
+import 'dart:async';
+import 'package:audioplayers/audioplayers.dart';
 
 class NotificationScreen extends StatefulWidget {
   const NotificationScreen({super.key});
@@ -8,7 +10,7 @@ class NotificationScreen extends StatefulWidget {
   _NotificationScreenState createState() => _NotificationScreenState();
 }
 
-class _NotificationScreenState extends State<NotificationScreen> {
+class _NotificationScreenState extends State<NotificationScreen> with SingleTickerProviderStateMixin {
   int _selectedIndex = 1;
   TimeOfDay _selectedTime = const TimeOfDay(hour: 7, minute: 0);
   bool _isAM = true;
@@ -17,6 +19,178 @@ class _NotificationScreenState extends State<NotificationScreen> {
     {'time': const TimeOfDay(hour: 7, minute: 0), 'isAM': true, 'isActive': true},
   ];
   List<Map<String, dynamic>> _alarmHistory = [];
+  late Timer _timer;
+  OverlayEntry? _overlayEntry;
+  final AudioPlayer _audioPlayer = AudioPlayer();
+  bool _isNotificationActive = false;
+  late AnimationController _animationController;
+  late Animation<double> _shakeAnimation;
+  DateTime? _lastTriggeredTime; // To track the last time an alarm was triggered
+
+  @override
+  void initState() {
+    super.initState();
+    // Initialize the animation controller for the vibrating effect
+    _animationController = AnimationController(
+      vsync: this,
+      duration: const Duration(milliseconds: 100),
+    )..repeat(reverse: true);
+
+    _shakeAnimation = Tween<double>(begin: -2.0, end: 2.0).animate(
+      CurvedAnimation(parent: _animationController, curve: Curves.easeInOut),
+    );
+
+    _startTimeCheck();
+  }
+
+  @override
+  void dispose() {
+    _timer.cancel();
+    _audioPlayer.dispose();
+    _animationController.dispose();
+    _removeOverlay();
+    super.dispose();
+  }
+
+  void _showInAppNotification() {
+    if (_isNotificationActive) return; // Prevent multiple notifications
+
+    setState(() {
+      _isNotificationActive = true;
+    });
+
+    // Play the alert.mp4 audio file in a loop
+    _audioPlayer.setReleaseMode(ReleaseMode.loop);
+    _audioPlayer.play(AssetSource('audio/alert.mp4'), volume: 1.0);
+
+    // Create the overlay entry for the notification with vibrating animation
+    _overlayEntry = OverlayEntry(
+      builder: (context) => Positioned(
+        top: 0,
+        left: 0,
+        right: 0,
+        child: AnimatedBuilder(
+          animation: _shakeAnimation,
+          builder: (context, child) {
+            return Transform.translate(
+              offset: Offset(_shakeAnimation.value, 0), // Vibrating effect
+              child: AnimatedContainer(
+                duration: const Duration(milliseconds: 300),
+                height: _isNotificationActive ? 100 : 0,
+                margin: const EdgeInsets.all(16.0),
+                decoration: BoxDecoration(
+                  color: const Color(0xFFF5E6F0),
+                  border: Border.all(color: const Color(0xFF8B5A8B), width: 2),
+                  borderRadius: BorderRadius.circular(12),
+                  boxShadow: [
+                    BoxShadow(
+                      color: Colors.black.withOpacity(0.1),
+                      blurRadius: 8,
+                      offset: const Offset(0, 4),
+                    ),
+                  ],
+                ),
+                child: Material(
+                  color: Colors.transparent,
+                  child: SafeArea(
+                    child: Padding(
+                      padding: const EdgeInsets.symmetric(horizontal: 24.0, vertical: 20.0),
+                      child: Row(
+                        mainAxisAlignment: MainAxisAlignment.spaceBetween,
+                        children: [
+                          const Text(
+                            'Pill Reminder',
+                            style: TextStyle(
+                              color: Color(0xFF8B5A8B),
+                              fontSize: 6,
+                              fontWeight: FontWeight.bold,
+                            ),
+                          ),
+                          Container(
+                            height: 50, // Increased height for the Stop button
+                            decoration: BoxDecoration(
+                              border: Border.all(color: const Color(0xFF8B5A8B), width: 2),
+                              borderRadius: BorderRadius.circular(8),
+                              color: Colors.white,
+                            ),
+                            child: TextButton(
+                              onPressed: () {
+                                _stopNotification();
+                              },
+                              child: const Text(
+                                'Stop',
+                                style: TextStyle(
+                                  color: Color(0xFF8B5A8B),
+                                  fontSize: 16,
+                                  fontWeight: FontWeight.bold,
+                                ),
+                              ),
+                            ),
+                          ),
+                        ],
+                      ),
+                    ),
+                  ),
+                ),
+              ),
+            );
+          },
+        ),
+      ),
+    );
+
+    // Insert the overlay entry into the overlay
+    Overlay.of(context).insert(_overlayEntry!);
+  }
+
+  void _stopNotification() {
+    // Stop the audio
+    _audioPlayer.stop();
+
+    // Stop the animation
+    _animationController.stop();
+
+    // Remove the overlay
+    _removeOverlay();
+
+    setState(() {
+      _isNotificationActive = false;
+    });
+  }
+
+  void _removeOverlay() {
+    _overlayEntry?.remove();
+    _overlayEntry = null;
+  }
+
+  void _startTimeCheck() {
+    _timer = Timer.periodic(const Duration(seconds: 1), (timer) {
+      final now = DateTime.now();
+      final currentHour = now.hour;
+      final currentMinute = now.minute;
+
+      // Check if the alarm was triggered in the last minute
+      if (_lastTriggeredTime != null &&
+          now.difference(_lastTriggeredTime!).inSeconds < 60) {
+        return; // Skip if the alarm was triggered within the last minute
+      }
+
+      for (var alarm in _activeAlarms) {
+        if (alarm['isActive'] == true) {
+          final alarmTime = alarm['time'] as TimeOfDay;
+          final alarmHour = alarm['isAM']
+              ? (alarmTime.hourOfPeriod == 12 ? 0 : alarmTime.hourOfPeriod)
+              : (alarmTime.hourOfPeriod == 12 ? 12 : alarmTime.hourOfPeriod + 12);
+          final alarmMinute = alarmTime.minute;
+
+          if (currentHour == alarmHour && currentMinute == alarmMinute) {
+            _lastTriggeredTime = now; // Update the last triggered time
+            _showInAppNotification();
+          }
+        }
+      }
+    });
+  }
 
   Widget _buildNavItem(int index, String assetPath, String label, {double width = 24, double height = 24}) {
     return GestureDetector(
@@ -62,6 +236,14 @@ class _NotificationScreenState extends State<NotificationScreen> {
     });
   }
 
+  void _incrementMinute() {
+    setState(() {
+      int newMinute = _selectedTime.minute + 1;
+      if (newMinute >= 60) newMinute = 0;
+      _selectedTime = TimeOfDay(hour: _selectedTime.hour, minute: newMinute);
+    });
+  }
+
   void _addAlarm() {
     setState(() {
       _activeAlarms.add({'time': _selectedTime, 'isAM': _isAM, 'isActive': true});
@@ -82,7 +264,6 @@ class _NotificationScreenState extends State<NotificationScreen> {
       body: SafeArea(
         child: Column(
           children: [
-            // Bell Reminder Container
             Stack(
               clipBehavior: Clip.none,
               children: [
@@ -111,8 +292,6 @@ class _NotificationScreenState extends State<NotificationScreen> {
                 ),
               ],
             ),
-
-            // Combined Digital and Analog Clock Tile
             Container(
               margin: const EdgeInsets.symmetric(horizontal: 16.0),
               padding: const EdgeInsets.all(16.0),
@@ -123,7 +302,6 @@ class _NotificationScreenState extends State<NotificationScreen> {
               ),
               child: Column(
                 children: [
-                  // Digital Time Display with Separate Containers
                   Row(
                     mainAxisAlignment: MainAxisAlignment.center,
                     children: [
@@ -144,7 +322,7 @@ class _NotificationScreenState extends State<NotificationScreen> {
                             style: TextStyle(
                               fontSize: 48,
                               fontWeight: FontWeight.bold,
-                              color: _isAdjustingHour ? const Color(0xFF8B5A8B) : Colors.grey,
+                              color: _isAdjustingHour ? const Color(0xFFD1C4E9) : Colors.grey,
                             ),
                           ),
                         ),
@@ -157,6 +335,7 @@ class _NotificationScreenState extends State<NotificationScreen> {
                         onTap: () {
                           setState(() {
                             _isAdjustingHour = false;
+                            _incrementMinute();
                           });
                         },
                         child: Container(
@@ -170,7 +349,7 @@ class _NotificationScreenState extends State<NotificationScreen> {
                             style: TextStyle(
                               fontSize: 48,
                               fontWeight: FontWeight.bold,
-                              color: !_isAdjustingHour ? const Color(0xFF8B5A8B) : Colors.grey,
+                              color: !_isAdjustingHour ? const Color(0xFFD1C4E9) : Colors.grey,
                             ),
                           ),
                         ),
@@ -206,7 +385,6 @@ class _NotificationScreenState extends State<NotificationScreen> {
                     ],
                   ),
                   const SizedBox(height: 16),
-                  // Analog Clock with Highlighted Number
                   GestureDetector(
                     onPanUpdate: (details) {
                       final RenderBox box = context.findRenderObject() as RenderBox;
@@ -226,7 +404,6 @@ class _NotificationScreenState extends State<NotificationScreen> {
                       child: Stack(
                         alignment: Alignment.center,
                         children: [
-                          // Clock Numbers with Highlight
                           ...List.generate(12, (index) {
                             final double angle = (index * 30 - 90) * math.pi / 180;
                             final int displayedNumber = _isAdjustingHour ? (index == 0 ? 12 : index) : index * 5;
@@ -258,21 +435,34 @@ class _NotificationScreenState extends State<NotificationScreen> {
                               ),
                             );
                           }),
-                          // Single Clock Hand
                           Transform.rotate(
                             angle: (_isAdjustingHour
                                     ? (_selectedTime.hourOfPeriod == 12 ? 0 : _selectedTime.hourOfPeriod) * 30
                                     : _selectedTime.minute * 6) *
                                 math.pi /
                                 180,
-                            child: Container(
-                              width: 0, // Thicker needle to match the reference
-                              height: 90, // Adjusted length to match the reference
-                              color: const Color(0xFF8B5A8B),
-                              alignment: Alignment.topCenter,
+                            child: Stack(
+                              alignment: Alignment.center,
+                              children: [
+                                Transform.translate(
+                                  offset: const Offset(0, -31), // Move the hand up by half its length to start from the center
+                                  child: Container(
+                                    width: 4,
+                                    height: 75, // Length of the hand is 90 pixels
+                                    color: const Color(0xFF8B5A8B),
+                                  ),
+                                ),
+                                Container(
+                                  width: 12,
+                                  height: 12,
+                                  decoration: const BoxDecoration(
+                                    shape: BoxShape.circle,
+                                    color: Color(0xFF8B5A8B),
+                                  ),
+                                ),
+                              ],
                             ),
                           ),
-                          Container(width: 12, height: 12, decoration: const BoxDecoration(shape: BoxShape.circle, color: Color(0xFF8B5A8B))),
                         ],
                       ),
                     ),
@@ -280,8 +470,6 @@ class _NotificationScreenState extends State<NotificationScreen> {
                 ],
               ),
             ),
-
-            // Buttons
             Padding(
               padding: const EdgeInsets.symmetric(vertical: 16.0),
               child: Row(
@@ -304,8 +492,6 @@ class _NotificationScreenState extends State<NotificationScreen> {
                 ],
               ),
             ),
-
-            // Active Alarms and History
             Expanded(
               child: DefaultTabController(
                 length: 2,
@@ -323,7 +509,6 @@ class _NotificationScreenState extends State<NotificationScreen> {
                     Expanded(
                       child: TabBarView(
                         children: [
-                          // Active Alarms
                           ListView.builder(
                             padding: const EdgeInsets.symmetric(horizontal: 16.0),
                             itemCount: _activeAlarms.length,
@@ -361,7 +546,6 @@ class _NotificationScreenState extends State<NotificationScreen> {
                               );
                             },
                           ),
-                          // Alarm History
                           ListView.builder(
                             padding: const EdgeInsets.symmetric(horizontal: 16.0),
                             itemCount: _alarmHistory.length,
