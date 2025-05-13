@@ -163,6 +163,8 @@ class _NotificationScreenState extends State<NotificationScreen> with SingleTick
     _overlayEntry = null;
   }
 
+  
+
   void _startTimeCheck() {
     _timer = Timer.periodic(const Duration(seconds: 1), (timer) {
       final now = DateTime.now();
@@ -257,10 +259,36 @@ class _NotificationScreenState extends State<NotificationScreen> with SingleTick
     });
   }
 
+  void _onNavItemTapped(int index) {
+    if (_selectedIndex == index) return; // Prevent navigating to the same screen
+
+    setState(() {
+      _selectedIndex = index;
+    });
+
+    switch (index) {
+      case 0:
+        Navigator.of(context).pushReplacementNamed('/home'); // Ensure route matches
+        break;
+      case 1:
+        Navigator.of(context).pushReplacementNamed('/notification'); // Ensure route matches
+        break;
+      case 2:
+        Navigator.of(context).pushReplacementNamed('/women'); // Ensure route matches
+        break;
+      case 3:
+        Navigator.of(context).pushReplacementNamed('/profile'); // Ensure route matches
+        break;
+      case 4:
+        Navigator.of(context).pushReplacementNamed('/settings'); // Ensure route matches
+        break;
+    }
+  }
+
   @override
   Widget build(BuildContext context) {
     return Scaffold(
-      backgroundColor: const Color(0xFFF5E6F0),
+      backgroundColor: const Color(0xFFF5EBFB),
       body: SafeArea(
         child: Column(
           children: [
@@ -576,19 +604,60 @@ class _NotificationScreenState extends State<NotificationScreen> with SingleTick
           ],
         ),
       ),
-      bottomNavigationBar: Container(
-        padding: const EdgeInsets.symmetric(vertical: 8.0),
-        color: const Color(0xFFF5E6F0),
-        child: Row(
-          mainAxisAlignment: MainAxisAlignment.spaceAround,
-          children: [
-            _buildNavItem(0, 'assets/images/home.png', "Home"),
-            _buildNavItem(1, 'assets/images/bell.png', "Notification"),
-            _buildNavItem(2, 'assets/images/women.png', "Women", width: 20, height: 40),
-            _buildNavItem(3, 'assets/images/profile.png', "Profile"),
-            _buildNavItem(4, 'assets/images/settings.png', "Settings"),
-          ],
-        ),
+      bottomNavigationBar: BottomNavigationBar(
+        currentIndex: _selectedIndex,
+        onTap: _onNavItemTapped,
+        backgroundColor: const Color(0xFFF5EBFB),
+        selectedItemColor: const Color(0xFFFF6F91),
+        unselectedItemColor: Colors.grey,
+        type: BottomNavigationBarType.fixed,
+        items: [
+          BottomNavigationBarItem(
+            icon: Image.asset(
+              'assets/images/home.png',
+              width: 24,
+              height: 24,
+              color: _selectedIndex == 0 ? const Color(0xFFFF6F91) : Colors.grey,
+            ),
+            label: "Home",
+          ),
+          BottomNavigationBarItem(
+            icon: Image.asset(
+              'assets/images/bell.png',
+              width: 24,
+              height: 24,
+              color: _selectedIndex == 1 ? const Color(0xFFFF6F91) : Colors.grey,
+            ),
+            label: "Notification",
+          ),
+          BottomNavigationBarItem(
+            icon: Image.asset(
+              'assets/images/women.png',
+              width: 24,
+              height: 24,
+              color: _selectedIndex == 2 ? const Color(0xFFFF6F91) : Colors.grey,
+            ),
+            label: "Women",
+          ),
+          BottomNavigationBarItem(
+            icon: Image.asset(
+              'assets/images/profile.png',
+              width: 24,
+              height: 24,
+              color: _selectedIndex == 3 ? const Color(0xFFFF6F91) : Colors.grey,
+            ),
+            label: "Profile",
+          ),
+          BottomNavigationBarItem(
+            icon: Image.asset(
+              'assets/images/settings.png',
+              width: 24,
+              height: 24,
+              color: _selectedIndex == 4 ? const Color(0xFFFF6F91) : Colors.grey,
+            ),
+            label: "Settings",
+          ),
+        ],
       ),
     );
   }
